@@ -217,7 +217,11 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
         self.playerItem = [AVPlayerItem playerItemWithAsset:asset];
         self.avPlayer = [[MOPUBAVPlayer alloc] initWithDelegate:self playerItem:self.playerItem];
         self.avPlayer.muted = YES;
-
+        
+        if (@available(iOS 10.0, *)) {
+            self.avPlayer.automaticallyWaitsToMinimizeStalling = NO;
+        }
+        
         [self.playerView setAvPlayer:self.avPlayer];
     }
 }
@@ -333,7 +337,7 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
         _loadingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
         _loadingIndicator.hidesWhenStopped = YES;
         _loadingIndicator.color = [UIColor whiteColor];
-        [self.view addSubview:_loadingIndicator];
+//        [self.view addSubview:_loadingIndicator];
     }
     return _loadingIndicator;
 }
@@ -342,12 +346,22 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
 {
     [self.loadingIndicator.superview bringSubviewToFront:_loadingIndicator];
     [self.loadingIndicator startAnimating];
+    
+    // Fix for II-4508: Add iFunny custom indicator
+    [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationsMoPubBeginLoadingVideo
+                                                        object:self
+                                                      userInfo:@{kMopubMediaUrl : self.mediaURL}];
 }
 
 - (void)stopLoadingIndicator
 {
     if (_loadingIndicator && _loadingIndicator.isAnimating) {
         [_loadingIndicator stopAnimating];
+        
+        // Fix for II-4508: Add iFunny custom indicator
+        [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationsMoPubEndLoadingVideo
+                                                            object:self
+                                                          userInfo:@{kMopubMediaUrl : self.mediaURL}];
     }
 }
 
@@ -628,6 +642,28 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
 - (void)displayAgentDidDismissModal
 {
     [self resume];
+}
+
+#pragma mark - Funcore custom API
+
+// Fix for II-4508: Add using cache
+- (void)loadAndPlayVideoUsingCache {
+    self.startedLoading = YES;
+    
+    NSArray *requestedKeys = @[kTracksKey, kPlayableKey];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationsMoPubBeginDownloadingVideo
+                                                        object:self
+                                                      userInfo:@{kMopubMediaUrl : self.mediaURL}];
+    
+    __weak __typeof(self) weakSelf = self;
+    [[IFMOPUBContentProvider instance] assetForUrl:self.mediaURL completion:^(AVURLAsset * _Nonnull asset) {
+        __typeof__(self) strongSelf = weakSelf;
+        if (!strongSelf.disposed) {
+            [strongSelf prepareToPlayAsset:asset withKeys:requestedKeys];
+        }
+        MPAddLogEvent([[MPLogEvent alloc ] initWithLogEventProperties:strongSelf.logEventProperties nativeVideoEventType:MPNativeVideoEventTypeDownloadStart]);        
+    }];
 }
 
 @end

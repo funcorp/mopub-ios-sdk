@@ -350,7 +350,7 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
     // Fix for II-4508: Add iFunny custom indicator
     [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationsMoPubBeginLoadingVideo
                                                         object:self
-                                                      userInfo:@{kMopubMediaUrl : self.mediaURL}];
+                                                      userInfo:[self mediaUrlNotificationUserInfo]];
 }
 
 - (void)stopLoadingIndicator
@@ -361,7 +361,7 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
         // Fix for II-4508: Add iFunny custom indicator
         [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationsMoPubEndLoadingVideo
                                                             object:self
-                                                          userInfo:@{kMopubMediaUrl : self.mediaURL}];
+                                                          userInfo:[self mediaUrlNotificationUserInfo]];
     }
 }
 
@@ -654,7 +654,7 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
     
     [[NSNotificationCenter defaultCenter] postNotificationName:kNotificationsMoPubBeginDownloadingVideo
                                                         object:self
-                                                      userInfo:@{kMopubMediaUrl : self.mediaURL}];
+                                                      userInfo:[self mediaUrlNotificationUserInfo]];
     
     __weak __typeof(self) weakSelf = self;
     [[IFMOPUBContentProvider instance] assetForUrl:self.mediaURL completion:^(AVURLAsset * _Nonnull asset) {
@@ -664,6 +664,14 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
         }
         MPAddLogEvent([[MPLogEvent alloc ] initWithLogEventProperties:strongSelf.logEventProperties nativeVideoEventType:MPNativeVideoEventTypeDownloadStart]);        
     }];
+}
+
+- (nullable NSDictionary *)mediaUrlNotificationUserInfo {
+    if (self.mediaURL) {
+        return @{kMopubMediaUrl: self.mediaURL};
+    } else {
+        return nil;
+    }
 }
 
 @end

@@ -172,9 +172,6 @@
 
 - (void)handlePersonalData
 {
-    [MPRewardedVideo initializeWithOrder:order];
-
-    self.globalMediationSettings = globalMediationSettings;
     [[MPConsentManager sharedManager] checkForIfaChange];
 }
 

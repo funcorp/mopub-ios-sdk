@@ -651,7 +651,6 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
         if (!strongSelf.disposed) {
             [strongSelf prepareToPlayAsset:asset withKeys:requestedKeys];
         }
-        MPAddLogEvent([[MPLogEvent alloc ] initWithLogEventProperties:strongSelf.logEventProperties nativeVideoEventType:MPNativeVideoEventTypeDownloadStart]);        
     }];
 }
 

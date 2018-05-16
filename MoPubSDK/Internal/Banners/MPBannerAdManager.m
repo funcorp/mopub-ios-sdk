@@ -232,8 +232,8 @@
         return;
     }
 
-    self.requestingAdapter = [[MPBannerCustomEventAdapter alloc] initWithConfiguration:self.requestingConfiguration
-                                                                              delegate:self];
+    self.requestingAdapter = [[MPInstanceProvider sharedProvider] buildBannerAdapterForConfiguration:self.requestingConfiguration
+                                                                                            delegate:self];
     if (!self.requestingAdapter) {
         [self loadAdWithURL:self.requestingConfiguration.failoverURL];
         return;

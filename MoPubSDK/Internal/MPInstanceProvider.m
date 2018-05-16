@@ -119,9 +119,9 @@ static MPInstanceProvider *sharedAdProvider = nil;
     if (configuration.customEventClass) {
 		
         if ([self shouldUseMPBannerCustomEventAdapter:delegate])
-        	return [[MPBannerCustomEventAdapter alloc] initWithDelegate:delegate];
+        	return [[MPBannerCustomEventAdapter alloc] initWithConfiguration:configuration delegate:delegate];
 		else
-			return [(MPBannerCustomEventAdapter *)[FCBannerCustomEventAdapter alloc] initWithDelegate:delegate];
+			return [(MPBannerCustomEventAdapter *)[FCBannerCustomEventAdapter alloc] initWithConfiguration:configuration delegate:delegate];
     }
 
     return nil;
